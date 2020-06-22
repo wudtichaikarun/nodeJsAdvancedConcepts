@@ -28,7 +28,9 @@
   > With Thread pool don't need to wait some Thread process, we can do other things inside the event loop.
   > ![nodeJs overview](/images/thread_pool.png)
 
-  - example from src/threads.js
+Example from src/threads.js
+
+- pendingOperations
 
   ```Javascript
   // result from: node src/threads.js
@@ -47,6 +49,17 @@
   > 2 cores only able to process these two threads at the same time.
   > ![nodeJs overview](/images/threads_mb.png)
 
+  ***
+
+Example from src/async.js
+
+- pendingOSTasks
+  > ![nodeJs overview](/images/libuv_os_delegation.png)
+
+> Note http module does not work with the thread pool.
+
+---
+
 ### OS Scheduler
 
 ![nodeJs overview](/images/os_schedule.png)
@@ -54,3 +67,14 @@
 > One core can process more than one threaded time through a process called multi-threading or you may have also heard it referred to as hyper threading
 
 ![nodeJs overview](/images/multi_threading.png)
+
+---
+
+### Clustering
+
+- without cluster
+  ![nodeJs overview](/images/without_cluster.png)
+
+- with cluster
+  ![nodeJs overview](/images/cluster_01.png)
+  ![nodeJs overview](/images/cluster_02.png)
