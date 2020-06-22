@@ -361,3 +361,19 @@ Percentage of the requests served within a certain time (ms)
   ```
 
 ### [pm2](https://pm2.keymetrics.io/docs/usage/cluster-mode/)
+
+```
+// start server with pm2
+> pm2 start index.js -i 0
+
+// log
+> pm2 logs
+
+// monitor
+> pm2 monit
+
+// stop server
+> pm2 delete index
+```
+
+![nodeJs overview](/images/pm2_start.png)

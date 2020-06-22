@@ -1,35 +1,21 @@
-process.env.UV_THREADPOOL_SIZE = 1;
-const cluster = require("cluster");
-// const numCPUs = require("os").cpus().length;
+const express = require("express");
+const crypto = require("crypto");
+const app = express();
 
-// Is the file being executed in master mode ?
-if (cluster.isMaster) {
-  // Cause index.js to be executed *again* but in child mode
+app.get("/", (req, res) => {
+  crypto.pbkdf2("my_password", "my_salt", 100000, 512, "sha512", () => {
+    console.log("request hash");
 
-  const numCPUs = 2;
-  // Fork workers.
-  for (let i = 0; i < numCPUs; i++) {
-    cluster.fork();
-  }
-} else {
-  // Im a child, Im going to act like a server and do noting else
-  const express = require("express");
-  const crypto = require("crypto");
-  const app = express();
-
-  app.get("/", (req, res) => {
-    crypto.pbkdf2("my_password", "my_salt", 100000, 512, "sha512", () => {
-      res.send("Hi");
-    });
+    res.send("Hi");
   });
+});
 
-  app.get("/fast", (req, res) => {
-    res.send("This was fast!");
-  });
+app.get("/fast", (req, res) => {
+  res.send("This was fast!");
+});
 
-  const PORT = 3000;
+const PORT = 3000;
 
-  app.listen(PORT, () => {
-    console.log(`API sever listening on ${PORT} processId: ${process.pid}`);
-  });
-}
+app.listen(PORT, () => {
+  console.log(`API sever listening on ${PORT} processId: ${process.pid}`);
+});
