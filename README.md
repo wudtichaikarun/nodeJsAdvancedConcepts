@@ -78,3 +78,67 @@ Example from src/async.js
 - with cluster
   ![nodeJs overview](/images/cluster_01.png)
   ![nodeJs overview](/images/cluster_02.png)
+
+- make request to test index.js `cluster.fork()`
+
+```
+// ab = use apache benchmark
+// localhost:3000/fast = to make request to localhost:3000/fast
+// -n 500 = total of 500 request
+// -c 50 = use a concurrency of 50 (50 requests at the same time)
+
+> ab -c 50 -n 500 localhost:3000/fast
+```
+
+result
+
+```
+This is ApacheBench, Version 2.3 <$Revision: 1843412 $>
+Copyright 1996 Adam Twiss, Zeus Technology Ltd, http://www.zeustech.net/
+Licensed to The Apache Software Foundation, http://www.apache.org/
+
+Benchmarking localhost (be patient)
+Completed 100 requests
+Completed 200 requests
+Completed 300 requests
+Completed 400 requests
+Completed 500 requests
+Finished 500 requests
+
+
+Server Software:
+Server Hostname:        localhost
+Server Port:            3000
+
+Document Path:          /fast
+Document Length:        14 bytes
+
+Concurrency Level:      50
+Time taken for tests:   0.431 seconds
+Complete requests:      500
+Failed requests:        0
+Total transferred:      106500 bytes
+HTML transferred:       7000 bytes
+Requests per second:    1160.06 [#/sec] (mean)
+Time per request:       43.101 [ms] (mean)
+Time per request:       0.862 [ms] (mean, across all concurrent requests)
+Transfer rate:          241.30 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0    2   4.2      0      24
+Processing:    12   37  18.2     33     148
+Waiting:       12   34  15.6     32     144
+Total:         14   39  18.9     34     148
+
+Percentage of the requests served within a certain time (ms)
+  50%     34
+  66%     42
+  75%     46
+  80%     48
+  90%     55
+  95%     64
+  98%     98
+  99%    140
+ 100%    148 (longest request)
+```
