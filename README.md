@@ -142,3 +142,222 @@ Percentage of the requests served within a certain time (ms)
   99%    140
  100%    148 (longest request)
 ```
+
+- example 1 worker, 1 thread
+  ![nodeJs overview](/images/1worker_1thread.png)
+
+  ```Javascript
+  // index.js
+  process.env.UV_THREADPOOL_SIZE = 1;
+  const cluster = require("cluster");
+
+  // Is the file being executed in master mode ?
+  if (cluster.isMaster) {
+    // Cause index.js to be executed *again* but in child mode
+    cluster.fork();
+
+  } else {
+    // Im a child, Im going to act like a server and do noting else
+    const express = require("express");
+    const crypto = require("crypto");
+    const app = express();
+
+    app.get("/", (req, res) => {
+      crypto.pbkdf2("my_password", "my_salt", 100000, 512, "sha512", () => {
+        res.send("Hi");
+      });
+    });
+
+    app.get("/fast", (req, res) => {
+      res.send("This was fast!");
+    });
+
+    const PORT = 3000;
+
+    app.listen(PORT, () => {
+      console.log(`API sever listening on ${PORT} processId: ${process.pid}`);
+    });
+  }
+
+  ```
+
+  make request
+
+  ```
+  // request
+  > ab -c 2 -n 2 localhost:3000/
+
+  // result
+  This is ApacheBench, Version 2.3 <$Revision: 1843412 $>
+  Copyright 1996 Adam Twiss, Zeus Technology Ltd, http://www.zeustech.net/
+  Licensed to The Apache Software Foundation, http://www.apache.org/
+
+  Benchmarking localhost (be patient).....done
+  ```
+
+Server Software:
+Server Hostname: localhost
+Server Port: 3000
+
+Document Path: /
+Document Length: 2 bytes
+
+Concurrency Level: 2
+Time taken for tests: 1.237 seconds
+Complete requests: 2
+Failed requests: 0
+Total transferred: 400 bytes
+HTML transferred: 4 bytes
+Requests per second: 1.62 [#/sec](mean)
+Time per request: 1236.829 [ms](mean)
+Time per request: 618.414 [ms] (mean, across all concurrent requests)
+Transfer rate: 0.32 [Kbytes/sec] received
+
+Connection Times (ms)
+min mean[+/-sd] median max
+Connect: 0 0 0.0 0 0
+Processing: 615 618 4.8 622 622
+Waiting: 615 618 4.8 622 622
+Total: 615 618 4.8 622 622
+
+Percentage of the requests served within a certain time (ms)
+50% 622
+66% 622
+75% 622
+80% 622
+90% 622
+95% 622
+98% 622
+99% 622
+100% 622 (longest request)
+
+---
+
+- example 2 worker 1 thread
+  ![nodeJs overview](/images/2worker_1thread.png)
+
+  ```Javascript
+    // index.js
+    process.env.UV_THREADPOOL_SIZE = 1;
+    const cluster = require("cluster");
+
+    // Is the file being executed in master mode ?
+    if (cluster.isMaster) {
+      // Cause index.js to be executed *again* but in child mode
+      cluster.fork();
+      cluster.fork();
+
+    } else {
+      // Im a child, Im going to act like a server and do noting else
+      const express = require("express");
+      const crypto = require("crypto");
+      const app = express();
+
+      app.get("/", (req, res) => {
+        crypto.pbkdf2("my_password", "my_salt", 100000, 512, "sha512", () => {
+          res.send("Hi");
+        });
+      });
+
+      app.get("/fast", (req, res) => {
+        res.send("This was fast!");
+      });
+
+      const PORT = 3000;
+
+      app.listen(PORT, () => {
+        console.log(`API sever listening on ${PORT} processId: ${process.pid}`);
+      });
+    }
+
+  ```
+
+```
+// request
+> ab -c 2 -n 2 localhost:3000/
+
+// result
+This is ApacheBench, Version 2.3 <$Revision: 1843412 $>
+Copyright 1996 Adam Twiss, Zeus Technology Ltd, http://www.zeustech.net/
+Licensed to The Apache Software Foundation, http://www.apache.org/
+Benchmarking localhost (be patient).....done
+
+Server Software:
+Server Hostname: localhost
+Server Port: 3000
+
+Document Path: /
+Document Length: 2 bytes
+
+Concurrency Level: 2
+Time taken for tests: 1.170 seconds
+Complete requests: 2
+Failed requests: 0
+Total transferred: 400 bytes
+HTML transferred: 4 bytes
+Requests per second: 1.71 [#/sec](mean)
+Time per request: 1170.074 [ms](mean)
+Time per request: 585.037 [ms] (mean, across all concurrent requests)
+Transfer rate: 0.33 [Kbytes/sec] received
+
+Connection Times (ms)
+min mean[+/-sd] median max
+Connect: 0 0 0.1 0 0
+Processing: 578 585 11.1 593 593
+Waiting: 577 584 10.6 592 592
+Total: 578 586 11.0 593 593
+
+Percentage of the requests served within a certain time (ms)
+50% 593
+66% 593
+75% 593
+80% 593
+90% 593
+95% 593
+98% 593
+99% 593
+100% 593 (longest request)
+```
+
+- example 6 worker, 1 thread result so bad!!!
+  ![nodeJs overview](/images/6worker_1thread.png)
+
+  ```Javascript
+  process.env.UV_THREADPOOL_SIZE = 1;
+  const cluster = require("cluster");
+  // const numCPUs = require("os").cpus().length;
+
+  // Is the file being executed in master mode ?
+  if (cluster.isMaster) {
+    // Cause index.js to be executed _again_ but in child mode
+
+    const numCPUs = 6;
+    // Fork workers.
+    for (let i = 0; i < numCPUs; i++) {
+      cluster.fork();
+    }
+  } else {
+  // Im a child, Im going to act like a server and do noting else
+  const express = require("express");
+  const crypto = require("crypto");
+  const app = express();
+
+  app.get("/", (req, res) => {
+    crypto.pbkdf2("my_password", "my_salt", 100000, 512, "sha512", () => {
+      res.send("Hi");
+    });
+  });
+
+  app.get("/fast", (req, res) => {
+    res.send("This was fast!");
+  });
+
+  const PORT = 3000;
+
+  app.listen(PORT, () => {
+    console.log(`API sever listening on ${PORT} processId: ${process.pid}`);
+    });
+  }
+  ```
+
+### [pm2](https://pm2.keymetrics.io/docs/usage/cluster-mode/)
